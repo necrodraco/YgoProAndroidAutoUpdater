@@ -17,7 +17,7 @@ my $command;
 my $image;
 my @pathsWithCDB = (); 
 my @imageList = (); 
-my $filename = "template.properties";#"settings.properties";
+my $filename = "settings.properties";
 my $values = ();
 my $ref; 
 ##Methods: 
@@ -31,6 +31,19 @@ sub readMethods(){
 				}
 			}
 	close($file);
+}
+
+sub doCommand($){
+	my $command = shift; 
+	system "$command";
+}
+sub doGitPull($){
+	my $refarg = shift; 
+	my @arg = @{$refarg};
+	foreach my $argument(@arg){
+		$command = "cd ".$values->{pathToYgopro}.$argument." && git pull";
+		system "$command";
+	}
 }
 
 ###############################################
@@ -113,18 +126,6 @@ sub doSqlQuery($){
 	my $dbh = shift; 
 	my $statement = shift; 
 	$dbh->do($statement)or die "$DBI::errstr\n"; 
-}
-sub doCommand($){
-	my $command = shift; 
-	system "$command";
-}
-sub doGitPull($){
-	my $refarg = shift; 
-	my @arg = @{$refarg};
-	foreach my $argument(@arg){
-		$command = "cd ".$values->{pathToYgopro}.$argument." && git pull";
-		system "$command";
-	}
 }
 sub doPic($){
 	$ref = shift; 
@@ -234,20 +235,30 @@ sub doRest(){
 ##End of Deprecated Methods
 
 ##Actions
-print "started\n";
+print "started Script\n";
 
 #Read all the Properties from settings.properties and save them in $values
 readMethods();
+print "Read settings.properties Finished\n";
 
 if($values->{testing} eq "1"){
+	print "Values contains: \n";
 	print Dumper $values;
 }
 
+##Do all Git Pulls
+my @list = ($values->{liveImages},$values->{live2017},$values->{liveanime});
+if($values->{testing} eq "1"){
+	print "Git will Pull from these Paths: \n";
+	print Dumper \@list;
+}
+
+doGitPull(\@list);
+
+print "Updated Local Instance of YgoPro Client completely\n";
+
 #Deprecated Actions
 if($values->{testing} eq "1"){
-	##Do all Git Pulls
-	my @list = ($values->{liveImages},$values->{live2017},$values->{liveanime});
-	doGitPull(\@list);
 
 	##Do All the Image-Things and Archiving Things
 	#doImages();
@@ -255,4 +266,4 @@ if($values->{testing} eq "1"){
 	#doRest();
 }
 
-print "finished\n";
+print "finished Script\n";
