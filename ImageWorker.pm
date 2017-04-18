@@ -9,8 +9,10 @@ sub doPic($){
 	$ref = shift; 
 	my @list = @{$ref};
 	foreach my $file (@list){
+		print "File is $file\n";
 		my @items = split(/pics/, $file);
 		my $src = $items[0]."/pics".$items[1]; 
+		print "src is $sr\n";
 		my $dest = $values->{imageFolder};
 
 		$image = new Image::Magick; 
