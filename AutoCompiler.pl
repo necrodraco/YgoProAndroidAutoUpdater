@@ -5,21 +5,24 @@ use warnings;
 use File::Find; 
 use File::Copy;
 use DBI; 
-use Image::Magick; 
 use Archive::Zip;
 use Archive::Zip qw(:ERROR_CODES); 
 use Data::Dumper; 
+
 no warnings 'experimental::smartmatch';
 
 ##DON'T Change anything following
 #Parameters without change: 
 my $command; 
-my $image;
 my @pathsWithCDB = (); 
 my @imageList = (); 
 my $filename = "settings.properties";
-my $values = ();
-my $ref; 
+our $values = ();
+our ($ref, $image); 
+
+##Imported Methods
+use ImageWorker; 
+
 ##Methods: 
 sub readMethods(){
 	open(my $file, "<", $filename) or die "can't open ".$filename;
@@ -126,21 +129,6 @@ sub doSqlQuery($){
 	my $dbh = shift; 
 	my $statement = shift; 
 	$dbh->do($statement)or die "$DBI::errstr\n"; 
-}
-sub doPic($){
-	$ref = shift; 
-	my @list = @{$ref};
-	foreach my $file (@list){
-		my @items = split(/pics/, $file);
-		my $src = $items[0]."/pics".$items[1]; 
-		my $dest = $values->{imageFolder};
-
-		$image = new Image::Magick; 
-		$image->Read($src);
-		$image->Set(quality=>'90');
-		$image->Strip();
-		$image->Write($dest.$items[1]);
-	}
 }
 sub doSymlink(){
 	##Remove all Symlinks for the Script Files
@@ -252,10 +240,10 @@ if($values->{testing} eq "1"){
 	print "Git will Pull from these Paths: \n";
 	print Dumper \@list;
 }
-
 doGitPull(\@list);
 
 print "Updated Local Instance of YgoPro Client completely\n";
+
 
 #Deprecated Actions
 if($values->{testing} eq "1"){
