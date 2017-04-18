@@ -150,7 +150,7 @@ sub doSymlink(){
 	doCommand("java -jar Symlinker.jar "
 			.$values->{pathToApkScriptFolder}." "
 			.$values->{manualFolder}." "
-			.$values->{oldScriptFOlder}." "
+			.$values->{oldScriptFolder}." "
 			.$values->{live2017ScriptFolder}." "
 			.$values->{liveAnimeScriptFolder}." "
 			.$values->{ygoproScriptFolder}
