@@ -2,11 +2,11 @@
 use strict;
 use warnings; 
 use Image::Magick; 
-our ($values, $image);
+our ($values, $image, $ref, @imageList);
 
 ##Contains all the Methods for manipulating the Images and OBB-Archives
 sub doPic($){
-	my $ref = shift; 
+	$ref = shift; 
 	my @list = @{$ref};
 	foreach my $file (@list){
 		my @items = split(/pics/, $file);
@@ -29,7 +29,7 @@ sub saveInArchive($){
 	my $archive = Archive::Zip->new();
 	foreach my $key(keys %$items){
 		if($key =~ /folder/){
-			$archive->addTree($items->{$key}."/", $items->{$key});#$pathToAddingFolder, $folderItems{$key});
+			$archive->addTree($items->{$key}."/", $items->{$key});
 		}else{
 			$archive->addFile($items->{$key}) or die "Error during Add File";
 		}
@@ -39,28 +39,34 @@ sub saveInArchive($){
 
 sub doImages(){
 	##Create the pic-items
-	find({ wanted => \&returnAllImages, no_chdir=>1}, $values->{pathToYgopro}.$values->{liveImages});#."/pics");
+	find({ wanted => \&returnAllImages, no_chdir=>1}, $values->{pathToYgopro}.$values->{liveImages});
 	doPic(\@imageList);
+
+	print "Finished prepare and storing Pics\n";
 
 	##Do Archiving Part 1
 	my %pathImage = ("folder1"=>"pics");
 	my @args = (
-		"main.4.co.ygopro.ygoproandroid.obb", 
+		$values->{nameOfMainOBB}, 
 		\%pathImage
 		);
 	saveInArchive(\@args);
+	
+	print "Archiving Pics to patch.obb finished\n";
 
 	##DO Archiving Part 2
 	my %pathArchiveFolderOnly = (
 		"folder1" => "ai", 
-		"file1" => "patch.48.co.ygopro.ygoproandroid.obb",
-		"file2" => "main.4.co.ygopro.ygoproandroid.obb"
+		"file1" => $values->{nameOfPatchOBB},
+		"file2" => $values->{nameOfMainOBB}
 		);
 	@args = (
 		"pics_normal.zip", 
 		\%pathArchiveFolderOnly
 		);
 	saveInArchive(\@args);
+
+	print "Archiving All Files to pics_.zip finished\n";
 }
 
 

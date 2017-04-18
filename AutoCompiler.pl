@@ -15,7 +15,7 @@ no warnings 'experimental::smartmatch';
 #Parameters without change: 
 my $command; 
 my @pathsWithCDB = (); 
-my @imageList = (); 
+our @imageList = (); 
 my $filename = "settings.properties";
 our $values = ();
 our ($ref, $image); 
