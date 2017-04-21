@@ -6,3 +6,6 @@ ygopro_old
 ygopro_custom
 *.obb
 pics
+pics_except
+*.zip
+ai

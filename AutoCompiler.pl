@@ -16,6 +16,7 @@ no warnings 'experimental::smartmatch';
 my $command; 
 my @pathsWithCDB = (); 
 our @imageList = (); 
+our @mainImageList = ();
 my $filename = "settings.properties";
 our $values = ();
 our ($ref, $image); 
@@ -59,10 +60,23 @@ sub returnAllDatabases(){
 		push(@pathsWithCDB, "$F");#"\"$F\"");
 	}
 }
+
+sub returnAllJumpedImages(){
+	my $F = $File::Find::name; 
+	if(/\.jpg$/){
+		my $filename = (split(/\//, $F))[-1];
+		push(@mainImageList, "$filename");
+	}
+}
+
 sub returnAllImages(){
 	my $F = $File::Find::name; 
 	if($F =~ /\.jpg$/){
-		push(@imageList, "$F");
+		my $filename = (split(/\//, $F))[-1];
+
+		if(!($filename ~~ @mainImageList)){
+			push(@imageList, "$F");
+		}
 	}
 }
 sub prepareParams($){
@@ -204,13 +218,15 @@ doGitPull(\@list);
 
 print "Updated Local Instance of YgoPro Client completely\n";
 
+##Do All the Image-Things and Archiving Things
+doImages();
+
+print "Updated the Images completely\n";
 
 #Deprecated Actions
 if($values->{testing} eq "1"){
 
-	##Do All the Image-Things and Archiving Things
-	doImages();
-
+	
 	#doRest();
 }
 

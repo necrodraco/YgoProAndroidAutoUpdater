@@ -2,17 +2,17 @@
 use strict;
 use warnings; 
 use Image::Magick; 
-our ($values, $image, $ref, @imageList);
+our ($values, $image, $ref, @imageList, @mainImageList);
 
 ##Contains all the Methods for manipulating the Images and OBB-Archives
+
+
 sub doPic($){
 	$ref = shift; 
 	my @list = @{$ref};
 	foreach my $file (@list){
-		print "File is $file\n";
 		my @items = split(/pics/, $file);
-		my $src = $items[0]."/pics".$items[1]; 
-		print "src is $sr\n";
+		my $src = $items[0]."pics".$items[1]; 
 		my $dest = $values->{imageFolder};
 
 		$image = new Image::Magick; 
@@ -29,6 +29,7 @@ sub saveInArchive($){
 	my $archiveName = shift @reference; 
 	my $items = shift @reference; 
 	my $archive = Archive::Zip->new();
+	print "ItemDump: ".(Dumper $items)."\n"; 
 	foreach my $key(keys %$items){
 		if($key =~ /folder/){
 			$archive->addTree($items->{$key}."/", $items->{$key});
@@ -41,15 +42,16 @@ sub saveInArchive($){
 
 sub doImages(){
 	##Create the pic-items
-	find({ wanted => \&returnAllImages, no_chdir=>1}, $values->{pathToYgopro}.$values->{liveImages});
-	doPic(\@imageList);
+	#find({ wanted => \&returnAllJumpedImages, no_chdir=>1}, $values->{pathToExceptPics});#.$values->{liveImages});
+	#find({ wanted => \&returnAllImages, no_chdir=>1}, $values->{pathToYgopro}.$values->{liveImages});
+	#doPic(\@imageList);
 
 	print "Finished prepare and storing Pics\n";
 
 	##Do Archiving Part 1
 	my %pathImage = ("folder1"=>"pics");
 	my @args = (
-		$values->{nameOfMainOBB}, 
+		$values->{nameOfPatchOBB}, 
 		\%pathImage
 		);
 	saveInArchive(\@args);
@@ -60,15 +62,15 @@ sub doImages(){
 	my %pathArchiveFolderOnly = (
 		"folder1" => "ai", 
 		"file1" => $values->{nameOfPatchOBB},
-		"file2" => $values->{nameOfMainOBB}
+		#"file2" => $values->{nameOfMainOBB}
 		);
 	@args = (
-		"pics_normal.zip", 
+		$values->{nameOfZipFile}, 
 		\%pathArchiveFolderOnly
 		);
 	saveInArchive(\@args);
 
-	print "Archiving All Files to pics_.zip finished\n";
+	print "Archiving All Files to ".$values->{nameOfZipFile}." finished\n";
 }
 
 
