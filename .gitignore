@@ -7,3 +7,6 @@ ygopro_custom
 *.obb
 pics
 *.apk
+pics_except
+*.zip
+ai
