@@ -29,7 +29,6 @@ sub saveInArchive($){
 	my $archiveName = shift @reference; 
 	my $items = shift @reference; 
 	my $archive = Archive::Zip->new();
-	print "ItemDump: ".(Dumper $items)."\n"; 
 	foreach my $key(keys %$items){
 		if($key =~ /folder/){
 			$archive->addTree($items->{$key}."/", $items->{$key});
@@ -42,9 +41,9 @@ sub saveInArchive($){
 
 sub doImages(){
 	##Create the pic-items
-	#find({ wanted => \&returnAllJumpedImages, no_chdir=>1}, $values->{pathToExceptPics});#.$values->{liveImages});
-	#find({ wanted => \&returnAllImages, no_chdir=>1}, $values->{pathToYgopro}.$values->{liveImages});
-	#doPic(\@imageList);
+	find({ wanted => \&returnAllJumpedImages, no_chdir=>1}, $values->{pathToExceptPics});#.$values->{liveImages});
+	find({ wanted => \&returnAllImages, no_chdir=>1}, $values->{pathToYgopro}.$values->{liveImages});
+	doPic(\@imageList);
 
 	print "Finished prepare and storing Pics\n";
 

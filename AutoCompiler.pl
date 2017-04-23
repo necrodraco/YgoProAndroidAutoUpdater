@@ -50,17 +50,6 @@ sub doGitPull($){
 	}
 }
 
-###############################################
-##Deprecated Methods
-
-sub returnAllDatabases(){
-	my $F = $File::Find::name; 
-
-	if($F =~ /\.cdb$/){
-		push(@pathsWithCDB, "$F");#"\"$F\"");
-	}
-}
-
 sub returnAllJumpedImages(){
 	my $F = $File::Find::name; 
 	if(/\.jpg$/){
@@ -77,6 +66,16 @@ sub returnAllImages(){
 		if(!($filename ~~ @mainImageList)){
 			push(@imageList, "$F");
 		}
+	}
+}
+
+###############################################
+##Deprecated Methods
+sub returnAllDatabases(){
+	my $F = $File::Find::name; 
+
+	if($F =~ /\.cdb$/){
+		push(@pathsWithCDB, "$F");#"\"$F\"");
 	}
 }
 sub prepareParams($){
@@ -162,7 +161,7 @@ sub doApk($){
 	$ref = shift; 
 	my %ai = %{$ref};
 	foreach my $key(keys %ai){
-		doCommand("cd ".$values->{pathToApkFolder}."/assets/ai && rm full.lua && ln -s ".$values->{pathToAIs}."".$ai{$key}." full.lua");
+		doCommand("cd ".$values->{pathToApkFolder}."/assets/ai && rm full.lua && ln -s ".$values->{pathOfAIs}."".$ai{$key}." full.lua");
 
 		##create the new APK
 		doCommand("apktool b -o ".$values->{pathToApkFolder}.$key.".apk ".$values->{pathToApkFolder});
@@ -214,7 +213,7 @@ if($values->{testing} eq "1"){
 	print "Git will Pull from these Paths: \n";
 	print Dumper \@list;
 }
-doGitPull(\@list);
+#doGitPull(\@list);
 
 print "Updated Local Instance of YgoPro Client completely\n";
 
@@ -225,9 +224,7 @@ print "Updated the Images completely\n";
 
 #Deprecated Actions
 if($values->{testing} eq "1"){
-
-	
-	#doRest();
+	doRest();
 }
 
 print "finished Script\n";
