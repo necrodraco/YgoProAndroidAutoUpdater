@@ -136,6 +136,10 @@ sub doSqlLiteMerge($){
 		doSqlQuery($dbh, "insert or ignore into texts select * from toMerge.texts");
 		doSqlQuery($dbh, "detach toMerge");
 	}	
+
+	#Change all Anime Cards to Non-Anime
+	doSqlQuery($dbh, "update datas set ot = 3 where ot = 4");
+
 	$dbh->disconnect();
 }
 sub doSqlQuery($){
@@ -213,7 +217,7 @@ if($values->{testing} eq "1"){
 	print "Git will Pull from these Paths: \n";
 	print Dumper \@list;
 }
-#doGitPull(\@list);
+doGitPull(\@list);
 
 print "Updated Local Instance of YgoPro Client completely\n";
 
