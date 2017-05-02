@@ -136,6 +136,10 @@ sub doSqlLiteMerge($){
 		doSqlQuery($dbh, "insert or ignore into texts select * from toMerge.texts");
 		doSqlQuery($dbh, "detach toMerge");
 	}	
+
+	#Change all Anime Cards to Non-Anime
+	doSqlQuery($dbh, "update datas set ot = 3 where ot = 4");
+
 	$dbh->disconnect();
 }
 sub doSqlQuery($){
