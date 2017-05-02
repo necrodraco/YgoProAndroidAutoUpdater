@@ -213,7 +213,7 @@ if($values->{testing} eq "1"){
 	print "Git will Pull from these Paths: \n";
 	print Dumper \@list;
 }
-#doGitPull(\@list);
+doGitPull(\@list);
 
 print "Updated Local Instance of YgoPro Client completely\n";
 

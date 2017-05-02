@@ -40,9 +40,16 @@ sub saveInArchive($){
 }
 
 sub doImages(){
+	print "Start Image Doings";
 	##Create the pic-items
 	find({ wanted => \&returnAllJumpedImages, no_chdir=>1}, $values->{pathToExceptPics});#.$values->{liveImages});
 	find({ wanted => \&returnAllImages, no_chdir=>1}, $values->{pathToYgopro}.$values->{liveImages});
+	
+	print "All listed Images are founded";
+	if($values->{testing} eq "1"){
+		print "All Images to add to patch.obb: ".()."\n";
+		print "All Jumped Images: ".(Dumper @mainImageList)."\n";
+	}
 	doPic(\@imageList);
 
 	print "Finished prepare and storing Pics\n";
