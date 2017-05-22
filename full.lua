@@ -1,0 +1,1 @@
+/home/jan/YgoProAndroidAutoUpdater/fulls/full_experienced.lua

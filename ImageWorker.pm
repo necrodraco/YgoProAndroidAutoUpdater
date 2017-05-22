@@ -37,18 +37,19 @@ sub saveInArchive($){
 		}
 	}
 	$archive->writeToFileNamed($archiveName) == AZ_OK or die "Error during writing to Archive ";
+	doCommand('split -b 64m "'.$archiveName.'" "'.$archiveName.'.part-"');
 }
 
 sub doImages(){
-	print "Start Image Doings";
+	print "Start Image Doings\n";
 	##Create the pic-items
 	find({ wanted => \&returnAllJumpedImages, no_chdir=>1}, $values->{pathToExceptPics});#.$values->{liveImages});
 	find({ wanted => \&returnAllImages, no_chdir=>1}, $values->{pathToYgopro}.$values->{liveImages});
 	
-	print "All listed Images are founded";
+	print "All listed Images are founded\n";
 	if($values->{testing} eq "1"){
-		print "All Images to add to patch.obb: ".()."\n";
-		print "All Jumped Images: ".(Dumper @mainImageList)."\n";
+		#print "All Images to add to patch.obb: ".(Dumper )."\n";
+		#print "All Jumped Images: ".(Dumper @mainImageList)."\n";
 	}
 	doPic(\@imageList);
 

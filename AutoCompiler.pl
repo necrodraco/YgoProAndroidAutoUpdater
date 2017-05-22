@@ -138,6 +138,7 @@ sub doSqlLiteMerge($){
 	}	
 
 	#Change all Anime Cards to Non-Anime
+	doSqlQuery($dbh, "update texts set name = name || '(Anime)' where name NOT LIKE '%(%) AND ot = 4'");
 	doSqlQuery($dbh, "update datas set ot = 3 where ot = 4");
 
 	$dbh->disconnect();
@@ -165,7 +166,10 @@ sub doApk($){
 	$ref = shift; 
 	my %ai = %{$ref};
 	foreach my $key(keys %ai){
-		doCommand("cd ".$values->{pathToApkFolder}."/assets/ai && rm full.lua && ln -s ".$values->{pathOfAIs}."".$ai{$key}." full.lua");
+		
+		doCommand("rm ".$values->{pathToApkFolder}."/assets/ai/full.lua");
+		
+		doCommand("ln -s ".$values->{pathOfAIs}."/".$ai{$key}." ".$values->{pathToApkFolder}."/assets/ai/full.lua");
 
 		##create the new APK
 		doCommand("apktool b -o ".$values->{pathToApkFolder}.$key.".apk ".$values->{pathToApkFolder});
@@ -179,11 +183,11 @@ sub doApk($){
 }
 sub doRest(){
 	##Do all the Script Files
-	doSymlink();
+	#doSymlink();
 
 	##Do all the Sqlite-Shit
-	find({ wanted => \&returnAllDatabases, no_chdir=>1}, $values->{pathToYgopro});
-	doSqlLiteMerge(prepareParams(\@pathsWithCDB));
+	#find({ wanted => \&returnAllDatabases, no_chdir=>1}, $values->{pathToYgopro});
+	#doSqlLiteMerge(prepareParams(\@pathsWithCDB));
 
 	##Do all to get the APK
 	my %ais = (
@@ -206,23 +210,23 @@ print "started Script\n";
 readMethods();
 print "Read settings.properties Finished\n";
 
-if($values->{testing} eq "1"){
+if($values->{testing} eq "1" && 0){
 	print "Values contains: \n";
 	print Dumper $values;
 }
 
 ##Do all Git Pulls
 my @list = ($values->{liveImages},$values->{live2017},$values->{liveanime});
-if($values->{testing} eq "1"){
+if($values->{testing} eq "1" && 0){
 	print "Git will Pull from these Paths: \n";
 	print Dumper \@list;
 }
-doGitPull(\@list);
+#doGitPull(\@list);
 
 print "Updated Local Instance of YgoPro Client completely\n";
 
 ##Do All the Image-Things and Archiving Things
-doImages();
+#doImages();
 
 print "Updated the Images completely\n";
 
