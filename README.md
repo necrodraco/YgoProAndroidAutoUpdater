@@ -8,9 +8,8 @@ Script which allows automatically Update YgoProAndroid. In Developing
 #Need to be installed: 
 perl #test with perl --version
 java #test with java -version
-perl sqlite3 Module # install on Ubuntu by sudo apt-get install libdbd-sqlite3-perl
+perl DBI and sqlite3 Module # install on Ubuntu by sudo apt-get install libdbd-sqlite3-perl
 ImageMagic #install on Ubuntu by sudo apt-get install imagemagick imagemagick-doc
-perl MooX Module
 Git LTS #Look for documentation #Only needed when Fill out the Upload-Options
 Apktool #Can be found here: https://ibotpeaches.github.io/Apktool/
 Apksign #Can be found here: https://github.com/appium/sign

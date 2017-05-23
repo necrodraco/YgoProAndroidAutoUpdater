@@ -5,61 +5,63 @@ use warnings;
 use File::Find; 
 use File::Copy;
 use DBI; 
-use Image::Magick; 
 use Archive::Zip;
 use Archive::Zip qw(:ERROR_CODES); 
 use Data::Dumper; 
+
 no warnings 'experimental::smartmatch';
 
 ##DON'T Change anything following
 #Parameters without change: 
 my $command; 
-my $image;
 my @pathsWithCDB = (); 
-my @imageList = (); 
+our @imageList = (); 
+our @mainImageList = ();
 my $filename = "settings.properties";
-my $values = ();
-my $ref; 
-##Methods: 
-sub readMethods(){
-	open(my $file, "<", $filename) or die "can't open ".$filename;
-		while (my $row = <$file>) {
-				if(!($row =~ "#")){
-					my @items = split(/=/,$row);
-					$items[1] =~ s/\n//g;
-					$values->{$items[0]} = $items[1]; 
-				}
-			}
-	close($file);
-}
+#our $values = ();
+our ($ref, $image); 
+our $library; 
 
-sub doCommand($){
-	my $command = shift; 
-	system "$command";
-}
+##Imported Methods
+use Library; 
+use ImageWorker; 
+
+##Methods: 
 sub doGitPull($){
 	my $refarg = shift; 
 	my @arg = @{$refarg};
 	foreach my $argument(@arg){
-		$command = "cd ".$values->{pathToYgopro}.$argument." && git pull";
-		system "$command";
+		$library->doCommand("cd ".$library->resources()->{pathToYgopro}.$argument.
+			" && git pull");
+	}
+}
+
+sub returnAllJumpedImages(){
+	my $F = $File::Find::name; 
+	if(/\.jpg$/){
+		my $filename = (split(/\//, $F))[-1];
+		push(@mainImageList, "$filename");
+	}
+}
+
+sub returnAllImages(){
+	my $F = $File::Find::name; 
+	if($F =~ /\.jpg$/){
+		my $filename = (split(/\//, $F))[-1];
+
+		if(!($filename ~~ @mainImageList)){
+			push(@imageList, "$F");
+		}
 	}
 }
 
 ###############################################
 ##Deprecated Methods
-
 sub returnAllDatabases(){
 	my $F = $File::Find::name; 
 
 	if($F =~ /\.cdb$/){
-		push(@pathsWithCDB, "$F");#"\"$F\"");
-	}
-}
-sub returnAllImages(){
-	my $F = $File::Find::name; 
-	if($F =~ /\.jpg$/){
-		push(@imageList, "$F");
+		push(@pathsWithCDB, "$F");
 	}
 }
 sub prepareParams($){
@@ -68,7 +70,7 @@ sub prepareParams($){
 	my @lPath = (); 
 	do{
 		my $path = shift @paths;
-		#if(1 > -M $path){
+		if(1 || 1 > -M $path){
 			if(!($path =~ m/\/language\//)){
 				if($path =~ m/\/cards-tf.cdb/){
 					unshift(@lPath, $path);
@@ -100,14 +102,14 @@ sub prepareParams($){
 					}
 				}
 			}
-		#}
+		}
 	}while(@paths);
 	return \@lPath;
 }
 sub doSqlLiteMerge($){
 	$ref = shift; 
 	my @list = @{$ref};
-	my $dest = $values->{pathToApkFolder}."/assets/cards.cdb";
+	my $dest = $library->resources()->{pathToApkFolder}."/assets/cards.cdb";
 	my $src = shift @list; 
 	copy($src, $dest) or die "Copy failed: $!";
 	
@@ -120,6 +122,11 @@ sub doSqlLiteMerge($){
 		doSqlQuery($dbh, "insert or ignore into texts select * from toMerge.texts");
 		doSqlQuery($dbh, "detach toMerge");
 	}	
+
+	#Change all Anime Cards to Non-Anime
+	doSqlQuery($dbh, "update texts set name = name || '(Anime)' where name NOT LIKE '%(%) AND ot = 4'");
+	doSqlQuery($dbh, "update datas set ot = 3 where ot = 4");
+
 	$dbh->disconnect();
 }
 sub doSqlQuery($){
@@ -127,97 +134,51 @@ sub doSqlQuery($){
 	my $statement = shift; 
 	$dbh->do($statement)or die "$DBI::errstr\n"; 
 }
-sub doPic($){
-	$ref = shift; 
-	my @list = @{$ref};
-	foreach my $file (@list){
-		my @items = split(/pics/, $file);
-		my $src = $items[0]."/pics".$items[1]; 
-		my $dest = $values->{imageFolder};
-
-		$image = new Image::Magick; 
-		$image->Read($src);
-		$image->Set(quality=>'90');
-		$image->Strip();
-		$image->Write($dest.$items[1]);
-	}
-}
 sub doSymlink(){
 	##Remove all Symlinks for the Script Files
-	doCommand("cd ".$values->{pathToApkScriptFolder}." && rm *.lua");
+	$library->doCommand("cd ".$library->resources()->{pathToApkScriptFolder}.
+		" && rm *.lua");
 
 	##Create all the Symlinks for the Script-Files
-	doCommand("java -jar Symlinker.jar "
-			.$values->{pathToApkScriptFolder}." "
-			.$values->{manualFolder}." "
-			.$values->{oldScriptFolder}." "
-			.$values->{live2017ScriptFolder}." "
-			.$values->{liveAnimeScriptFolder}." "
-			.$values->{ygoproScriptFolder}
+	$library->doCommand("java -jar Symlinker.jar "
+			.$library->resources()->{pathToApkScriptFolder}." "
+			.$library->resources()->{manualFolder}." "
+			.$library->resources()->{oldScriptFolder}." "
+			.$library->resources()->{live2017ScriptFolder}." "
+			.$library->resources()->{liveAnimeScriptFolder}." "
+			.$library->resources()->{ygoproScriptFolder}
 		);
 }
 sub doApk($){
 	$ref = shift; 
 	my %ai = %{$ref};
 	foreach my $key(keys %ai){
-		doCommand("cd ".$values->{pathToApkFolder}."/assets/ai && rm full.lua && ln -s ".$values->{pathToAIs}."".$ai{$key}." full.lua");
+		
+		$library->doCommand("rm ".$library->resources()->{pathToApkFolder}."/assets/ai/full.lua");
+		
+		$library->doCommand("ln -s ".$library->resources()->{pathOfAIs}."/".$ai{$key}." ".
+			$library->resources()->{pathToApkFolder}."/assets/ai/full.lua");
 
 		##create the new APK
-		doCommand("apktool b -o ".$values->{pathToApkFolder}.$key.".apk ".$values->{pathToApkFolder});
+		$library->doCommand("apktool b -o ".$library->resources()->{pathToApkFolder}.$key.".apk ".
+			$library->resources()->{pathToApkFolder});
 
 		##sign it
-		doCommand("apksign ".$values->{pathToApkFolder}.$key.".apk"); 
+		$library->doCommand("apksign ".$library->resources()->{pathToApkFolder}.$key.".apk"); 
 
 		##rename
-		doCommand("rm ".$values->{pathToApkFolder}.$key.".apk && mv ".$values->{pathToApkFolder}.$key.".s.apk ".$values->{pathToApkFolder}.$key.".apk"); 
+		$library->doCommand("rm ".$library->resources()->{pathToApkFolder}.$key.".apk && mv ".
+			$library->resources()->{pathToApkFolder}.$key.".s.apk ".
+			$library->resources()->{pathToApkFolder}.$key.".apk"
+			); 
 	}
-}
-sub saveInArchive($){
-	$ref = shift; 
-	my @reference = @{$ref};
-	my $archiveName = shift @reference; 
-	my $items = shift @reference; 
-	my $archive = Archive::Zip->new();
-	foreach my $key(keys %$items){
-		if($key =~ /folder/){
-			$archive->addTree($items->{$key}."/", $items->{$key});#$pathToAddingFolder, $folderItems{$key});
-		}else{
-			$archive->addFile($items->{$key}) or die "Error during Add File";
-		}
-	}
-	$archive->writeToFileNamed($archiveName) == AZ_OK or die "Error during writing to Archive ";
-}
-sub doImages(){
-	##Create the pic-items
-	find({ wanted => \&returnAllImages, no_chdir=>1}, $values->{pathToYgopro}.$values->{liveImages});#."/pics");
-	doPic(\@imageList);
-
-	##Do Archiving Part 1
-	my %pathImage = ("folder1"=>"pics");
-	my @args = (
-		"main.4.co.ygopro.ygoproandroid.obb", 
-		\%pathImage
-		);
-	saveInArchive(\@args);
-
-	##DO Archiving Part 2
-	my %pathArchiveFolderOnly = (
-		"folder1" => "ai", 
-		"file1" => "patch.48.co.ygopro.ygoproandroid.obb",
-		"file2" => "main.4.co.ygopro.ygoproandroid.obb"
-		);
-	@args = (
-		"pics_normal.zip", 
-		\%pathArchiveFolderOnly
-		);
-	saveInArchive(\@args);
 }
 sub doRest(){
 	##Do all the Script Files
 	doSymlink();
 
 	##Do all the Sqlite-Shit
-	find({ wanted => \&returnAllDatabases, no_chdir=>1}, $values->{pathToYgopro});
+	find({ wanted => \&returnAllDatabases, no_chdir=>1}, $library->resources()->{pathToYgopro});
 	doSqlLiteMerge(prepareParams(\@pathsWithCDB));
 
 	##Do all to get the APK
@@ -237,33 +198,36 @@ sub doRest(){
 ##Actions
 print "started Script\n";
 
-#Read all the Properties from settings.properties and save them in $values
-readMethods();
+#Read all the Properties from settings.properties and save them in $library->resources()
+$library = Library->new(filename => $filename);
+
+$library->readElementsResources(); 
+
 print "Read settings.properties Finished\n";
 
-if($values->{testing} eq "1"){
+if($library->resources()->{testing} eq "1" && 0){
 	print "Values contains: \n";
-	print Dumper $values;
+	print Dumper $library->resources();
 }
 
 ##Do all Git Pulls
-my @list = ($values->{liveImages},$values->{live2017},$values->{liveanime});
-if($values->{testing} eq "1"){
+my @list = ($library->resources()->{liveImages},$library->resources()->{live2017},$library->resources()->{liveanime});
+if($library->resources()->{testing} eq "1" && 0){
 	print "Git will Pull from these Paths: \n";
 	print Dumper \@list;
 }
-
 doGitPull(\@list);
 
 print "Updated Local Instance of YgoPro Client completely\n";
 
+##Do All the Image-Things and Archiving Things
+doImages();
+
+print "Updated the Images completely\n";
+
 #Deprecated Actions
-if($values->{testing} eq "1"){
-
-	##Do All the Image-Things and Archiving Things
-	#doImages();
-
-	#doRest();
+if($library->resources()->{testing} eq "1"){
+	doRest();
 }
 
 print "finished Script\n";
