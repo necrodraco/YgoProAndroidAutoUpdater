@@ -40,7 +40,7 @@ sub saveInArchive($){
 	}
 	$archive->writeToFileNamed($archiveName) == AZ_OK or die "Error during writing to Archive ";
 	if($split == 1){
-		$library->doCommand('split -b 64m "'.$archiveName.'" "'.$archiveName.'.part-"');
+		$library->doCommand('split -b 50m "'.$archiveName.'" "'.$archiveName.'.part-"');
 	}
 }
 
