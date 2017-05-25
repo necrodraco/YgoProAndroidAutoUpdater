@@ -4,3 +4,10 @@ fulls
 ygopro
 ygopro_old
 ygopro_custom
+ai
+pics*
+*.obb
+*.zip
+YGOPRO_ANDROID
+patch*.*
+*.apk
