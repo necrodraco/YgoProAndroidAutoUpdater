@@ -18,7 +18,6 @@ my @pathsWithCDB = ();
 our @imageList = (); 
 our @mainImageList = ();
 my $filename = "settings.properties";
-#our $values = ();
 our ($ref, $image); 
 our $library; 
 
@@ -124,7 +123,11 @@ sub doSqlLiteMerge($){
 	}	
 
 	#Change all Anime Cards to Non-Anime
-	doSqlQuery($dbh, "update texts set name = name || '(Anime)' where name NOT LIKE '%(%) AND ot = 4'");
+	doSqlQuery(
+			$dbh, 
+			"update texts set name = name || '(Anime)' where id IN(select d.id FROM datas d JOIN texts t WHERE t.name NOT LIKE '%(%)' AND d.ot = 4)"
+			#UPDATE closure SET checked = 0 WHERE item_id IN (SELECT id FROM item WHERE ancestor_id = 1);
+		);
 	doSqlQuery($dbh, "update datas set ot = 3 where ot = 4");
 
 	$dbh->disconnect();

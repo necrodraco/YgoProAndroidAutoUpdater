@@ -28,6 +28,8 @@ sub saveInArchive($){
 	my @reference = @{$ref};
 	my $archiveName = shift @reference; 
 	my $items = shift @reference; 
+	my $split = shift @reference || 0;#The Archive should be splitted if 1
+	
 	my $archive = Archive::Zip->new();
 	foreach my $key(keys %$items){
 		if($key =~ /folder/){
@@ -37,7 +39,9 @@ sub saveInArchive($){
 		}
 	}
 	$archive->writeToFileNamed($archiveName) == AZ_OK or die "Error during writing to Archive ";
-	$library->doCommand('split -b 64m "'.$archiveName.'" "'.$archiveName.'.part-"');
+	if($split == 1){
+		$library->doCommand('split -b 64m "'.$archiveName.'" "'.$archiveName.'.part-"');
+	}
 }
 
 sub doImages(){
@@ -73,7 +77,8 @@ sub doImages(){
 		);
 	@args = (
 		$library->resources()->{nameOfZipFile}, 
-		\%pathArchiveFolderOnly
+		\%pathArchiveFolderOnly, 
+		1
 		);
 	saveInArchive(\@args);
 
