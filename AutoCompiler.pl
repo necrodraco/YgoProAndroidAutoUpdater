@@ -48,19 +48,19 @@ print "Updated Local Instance of YgoPro Client completely\n";
 print "Updated the Images completely\n";
 
 ##Do all the Script Files
-$library->doSymlink();
+#$library->doSymlink();
 
 ##Do all the Sqlite-Doings
-$library->doSqlLite();
+#$library->doSqlLite();
 
 ##Do all to get the APK
 my %ais = (
-		"_simple" => "full_simple.lua",
-		"_experienced" => "full_experienced.lua"
+		$library->resources()->{'nameOfSimpleApk'} => "full".$library->resources()->{'nameOfSimpleApk'}.".lua",
+		$library->resources()->{'nameOfExperiencedApk'} => "full".$library->resources()->{'nameOfExperiencedApk'}.".lua"
 );
 #$library->doApk(\%ais);
 
 ##upload of the files to Github
-#$libray->doUpload();
+$library->doUpload();
 
 print "finished Script\n";

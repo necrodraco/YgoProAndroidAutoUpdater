@@ -47,8 +47,18 @@ package Library{
 	}
 	sub doUpload(){	
 		my $self = shift(); 
-		$self->doCommand("git add * ");
-		my $versionNumber; 
+		$self->doCommand("cd ".$self->resources()->{nameOfOutput}." && git add * ");
+		$self->doCommand("cd ~/Downloads/test && git status");
+		#my $versionNumber = $self->version();
+
+		#$self->doCommand("cd ~/Downloads/test && git commit -m 'Automatic Upload:'".$versionNumber);
+		#$self->doCommand("cd ~/Downloads/test && git push origin master");
+
+		print "Upload finished\n";
+	}
+
+	sub version(){
+		my ($self, $versionNumber) = @_; 
 		open(my $versionRead, "<", "version.md"); 
 			$versionNumber = <$versionRead>;
 		close($versionRead);
@@ -60,11 +70,7 @@ package Library{
 		open(my $versionWrite, ">", "version.md"); 
 			print $versionWrite $versionNumber; 
 		close($versionWrite); 
-
-		$self->doCommand("git commit -m 'Automatic Upload:'".$versionNumber);
-		$self->doCommand("git push origin master");
-
-		print "Upload finished\n";
+		return $versionNumber; 
 	}
 	sub doSymlink(){
 		my $self = shift(); 
