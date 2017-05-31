@@ -47,16 +47,25 @@ package Library{
 	}
 	sub doUpload(){	
 		my $self = shift(); 
-		$self->doCommand("mv -t ".$self->resources()->{nameOfOutput}." pics_normal.zip.* ygopro".$self->resources()->{nameOfExperiencedApk}.".apk");
-		$self->doCommand("mv ygopro".$self->resources()->{nameOfSimpleApk}.".apk ".$self->resources()->{nameOfOutput}."/".$self->resources()->{nameOfApk});
-		$self->doCommand("cd ".$self->resources()->{nameOfOutput}." && git add * ");
-		$self->doCommand("cd ".$self->resources()->{nameOfOutput}." && git status");
-		my $versionNumber = $self->version();
-
-		$self->doCommand("cd ".$self->resources()->{nameOfOutput}." && git commit -m 'Automatic Upload: ".$versionNumber."'");
-		$self->doCommand("cd ".$self->resources()->{nameOfOutput}." && git push origin master");
-
+		$self->placeFiles($self->resources()->{pathToDrive}, 0, "");
+		$self->placeFiles($self->resources()->{nameOfOutput}, 1, ".*");
+		
 		print "Upload finished\n";
+	}
+
+	sub placeFiles(){
+		my ($self, $pathToPlace, $git, $part) = @_; 
+
+		$self->doCommand("cp -t ".$pathToPlace." pics_normal.zip".$part." ygopro".$self->resources()->{nameOfExperiencedApk}.".apk");
+		$self->doCommand("cp ygopro".$self->resources()->{nameOfSimpleApk}.".apk ".$pathToPlace."/".$self->resources()->{nameOfApk});
+		if($git){
+			$self->doCommand("cd ".$pathToPlace." && git add * ");
+			$self->doCommand("cd ".$pathToPlace." && git status");
+			my $versionNumber = $self->version();
+
+			$self->doCommand("cd ".$pathToPlace." && git commit -m 'Automatic Upload: ".$versionNumber."'");
+			$self->doCommand("cd ".$pathToPlace." && git push origin master");
+		}
 	}
 
 	sub version(){
