@@ -47,12 +47,14 @@ package Library{
 	}
 	sub doUpload(){	
 		my $self = shift(); 
+		$self->doCommand("mv -t ".$self->resources()->{nameOfOutput}." pics_normal.zip.* ygopro".$self->resources()->{nameOfExperiencedApk}.".apk");
+		$self->doCommand("mv ygopro".$self->resources()->{nameOfSimpleApk}.".apk ".$self->resources()->{nameOfOutput}."/".$self->resources()->{nameOfApk});
 		$self->doCommand("cd ".$self->resources()->{nameOfOutput}." && git add * ");
-		$self->doCommand("cd ~/Downloads/test && git status");
-		#my $versionNumber = $self->version();
+		$self->doCommand("cd ".$self->resources()->{nameOfOutput}." && git status");
+		my $versionNumber = $self->version();
 
-		#$self->doCommand("cd ~/Downloads/test && git commit -m 'Automatic Upload:'".$versionNumber);
-		#$self->doCommand("cd ~/Downloads/test && git push origin master");
+		$self->doCommand("cd ".$self->resources()->{nameOfOutput}." && git commit -m 'Automatic Upload: ".$versionNumber."'");
+		$self->doCommand("cd ".$self->resources()->{nameOfOutput}." && git push origin master");
 
 		print "Upload finished\n";
 	}

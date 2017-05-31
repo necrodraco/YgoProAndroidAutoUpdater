@@ -2,7 +2,6 @@
 
 use strict; 
 use warnings; 
-#use DBI; 
 	
 use Data::Dumper; 
 
@@ -37,30 +36,32 @@ if($library->resources()->{testing} eq "1" && 0){
 	print "Git will Pull from these Paths: \n";
 	print Dumper \@list;
 }
-#$library->doGitPull(\@list);
+$library->doGitPull(\@list);
 
 print "Updated Local Instance of YgoPro Client completely\n";
 
 ##Do All the Image-Things and Archiving Things
-#$imageWorker = ImageWorker->new(library => $library); 
-#$imageWorker->doImages();
+$imageWorker = ImageWorker->new(library => $library); 
+$imageWorker->doImages();
 
 print "Updated the Images completely\n";
 
 ##Do all the Script Files
-#$library->doSymlink();
+$library->doSymlink();
 
 ##Do all the Sqlite-Doings
-#$library->doSqlLite();
+$library->doSqlLite();
 
 ##Do all to get the APK
 my %ais = (
 		$library->resources()->{'nameOfSimpleApk'} => "full".$library->resources()->{'nameOfSimpleApk'}.".lua",
 		$library->resources()->{'nameOfExperiencedApk'} => "full".$library->resources()->{'nameOfExperiencedApk'}.".lua"
 );
-#$library->doApk(\%ais);
+$library->doApk(\%ais);
 
 ##upload of the files to Github
-$library->doUpload();
+if($library->resources()->{'DoUpload'} == 1){
+	$library->doUpload();
+}
 
 print "finished Script\n";
