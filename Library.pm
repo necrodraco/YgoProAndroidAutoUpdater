@@ -48,8 +48,6 @@ package Library{
 			if($status ne 'Bereits aktuell.'){
 				$self->changes(1); 
 			}
-			#$self->doCommand("cd ".$self->resources()->{pathToYgopro}.$argument.
-			#	" && git pull");
 		}
 	}
 	sub doUpload(){	
@@ -59,7 +57,6 @@ package Library{
 		
 		print "Upload finished\n";
 	}
-
 	sub placeFiles(){
 		my ($self, $pathToPlace, $git, $part) = @_; 
 
@@ -74,7 +71,6 @@ package Library{
 			$self->doCommand("cd ".$pathToPlace." && git push origin master");
 		}
 	}
-
 	sub version(){
 		my ($self, $versionNumber) = @_; 
 		open(my $versionRead, "<", "version.md"); 
@@ -176,31 +172,29 @@ package Library{
 		my @lPath = (); 
 		do{
 			my $path = shift @paths;
-			if(1 || 1 > -M $path){
-				if(!($path =~ m/\/language\//)){
-					if($path =~ m/\/cards-tf.cdb/){
-						unshift(@lPath, $path);
+			if(!($path =~ m/\/language\//)){
+				if($path =~ m/\/cards-tf.cdb/){
+					unshift(@lPath, $path);
+				}else{
+					if($path =~ m/\/live2/){
+						push(@lPath, $path);
 					}else{
-						if($path =~ m/\/live2/){
-							push(@lPath, $path);
+						if(@paths ~~ m/\/live2/){
+							push(@paths, $path);
 						}else{
-							if(@paths ~~ m/\/live2/){
-								push(@paths, $path);
+							if($path =~ m/\/liveanime\//){
+								push(@lPath, $path);
 							}else{
-								if($path =~ m/\/liveanime\//){
-									push(@lPath, $path);
+								if(@paths ~~ m/\/liveanime\//){
+									push(@paths, $path);
 								}else{
-									if(@paths ~~ m/\/liveanime\//){
-										push(@paths, $path);
+									if($path =~ m/\/expansions\//){
+										push(@lPath, $path);
 									}else{
-										if($path =~ m/\/expansions\//){
-											push(@lPath, $path);
+										if(@paths ~~ m/\/expansions\//){
+											push(@paths, $path);
 										}else{
-											if(@paths ~~ m/\/expansions\//){
-												push(@paths, $path);
-											}else{
-												push(@lPath, $path);
-											}
+											push(@lPath, $path);
 										}
 									}
 								}

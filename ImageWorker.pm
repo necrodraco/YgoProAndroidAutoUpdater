@@ -61,7 +61,7 @@ package ImageWorker{
 		find({ wanted => \&returnAllJumpedImages, no_chdir=>1}, $self->library->resources()->{pathToExceptPics});
 		find({ wanted => \&returnAllImages, no_chdir=>1}, $self->library->resources()->{pathToYgopro}.$self->library->resources()->{liveImages});
 		
-		print "All listed Images are founded\n";
+		print "All listed Images are found\n";
 		if($self->library->resources()->{testing} eq "1"){
 			#print "All Images to add to patch.obb: ".(Dumper )."\n";
 			#print "All Jumped Images: ".(Dumper @mainImageList)."\n";

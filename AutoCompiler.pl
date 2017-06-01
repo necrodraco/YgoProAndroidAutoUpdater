@@ -25,45 +25,46 @@ $library->readElementsResources();
 
 print "Read settings.properties Finished\n";
 
-if($library->resources()->{testing} eq "1" && 0){
+if($library->resources()->{testing} eq "1"){
 	print "Values contains: \n";
 	print Dumper $library->resources();
 }
 
 ##Do all Git Pulls
 my @list = ($library->resources()->{liveImages},$library->resources()->{live2017},$library->resources()->{liveanime});
-if($library->resources()->{testing} eq "1" && 0){
+if($library->resources()->{testing} eq "1"){
 	print "Git will Pull from these Paths: \n";
 	print Dumper \@list;
 }
 $library->doGitPull(\@list);
 
+#Only Upload Files if Something has changed
 if($library->changes() == 1){
-print "Updated Local Instance of YgoPro Client completely\n";
+	print "Updated Local Instance of YgoPro Client completely\n";
 
-##Do All the Image-Things and Archiving Things
-$imageWorker = ImageWorker->new(library => $library); 
-$imageWorker->doImages();
+	##Do All the Image-Things and Archiving Things
+	$imageWorker = ImageWorker->new(library => $library); 
+	$imageWorker->doImages();
 
-print "Updated the Images completely\n";
+	print "Updated the Images completely\n";
 
-##Do all the Script Files
-$library->doSymlink();
+	##Do all the Script Files
+	$library->doSymlink();
 
-##Do all the Sqlite-Doings
-$library->doSqlLite();
+	##Do all the Sqlite-Doings
+	$library->doSqlLite();
 
-##Do all to get the APK
-my %ais = (
-		$library->resources()->{'nameOfSimpleApk'} => "full".$library->resources()->{'nameOfSimpleApk'}.".lua",
-		$library->resources()->{'nameOfExperiencedApk'} => "full".$library->resources()->{'nameOfExperiencedApk'}.".lua"
-);
-$library->doApk(\%ais);
+	##Do all to get the APK
+	my %ais = (
+			$library->resources()->{'nameOfSimpleApk'} => "full".$library->resources()->{'nameOfSimpleApk'}.".lua",
+			$library->resources()->{'nameOfExperiencedApk'} => "full".$library->resources()->{'nameOfExperiencedApk'}.".lua"
+	);
+	$library->doApk(\%ais);
 
-##upload of the files to Github
-if($library->resources()->{'DoUpload'} == 1){
-	$library->doUpload();
-}
+	##upload of the files to Github
+	if($library->resources()->{'DoUpload'} == 1){
+		$library->doUpload();
+	}
 }else{
 	print "No changes, no Update\n";
 }
