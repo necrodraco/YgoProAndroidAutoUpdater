@@ -38,6 +38,7 @@ if($library->resources()->{testing} eq "1" && 0){
 }
 $library->doGitPull(\@list);
 
+if($library->changes() == 1){
 print "Updated Local Instance of YgoPro Client completely\n";
 
 ##Do All the Image-Things and Archiving Things
@@ -63,5 +64,7 @@ $library->doApk(\%ais);
 if($library->resources()->{'DoUpload'} == 1){
 	$library->doUpload();
 }
-
+}else{
+	print "No changes, no Update\n";
+}
 print "finished Script\n";

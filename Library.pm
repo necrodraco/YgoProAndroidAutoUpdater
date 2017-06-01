@@ -7,11 +7,13 @@ package Library{
 	use File::Find; 
 	use File::Copy;
 	use DBI; 
+	use Git::Repository; 
 	
 	no warnings 'experimental::smartmatch';
 
 	has filename => (is => 'rw', required => 1);
 	has resources => ( is => 'rw');
+	has changes => (is => 'rw', default => 0); 
 
 	my @pathsWithCDB = (); 
 
@@ -41,8 +43,13 @@ package Library{
 		my ($self, $refarg) = @_;
 		my @arg = @{$refarg};
 		foreach my $argument(@arg){
-			$self->doCommand("cd ".$self->resources()->{pathToYgopro}.$argument.
-				" && git pull");
+			my $repo = Git::Repository->new(git_dir => $self->resources()->{pathToYgopro}.$argument."/.git");
+			my $status = $repo->run('pull');
+			if($status ne 'Bereits aktuell.'){
+				$self->changes(1); 
+			}
+			#$self->doCommand("cd ".$self->resources()->{pathToYgopro}.$argument.
+			#	" && git pull");
 		}
 	}
 	sub doUpload(){	
