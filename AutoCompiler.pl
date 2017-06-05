@@ -37,6 +37,7 @@ if($library->resources()->{testing} eq "1"){
 	print Dumper \@list;
 }
 $library->doGitPull(\@list);
+print "pull finished\n";
 
 #Only Upload Files if Something has changed
 if($library->changes() == 1){
@@ -66,6 +67,8 @@ if($library->changes() == 1){
 		$library->doUpload();
 	}
 }else{
+	#print "upload only for test\n";
+	#$library->doUpload();
 	print "No changes, no Update\n";
 }
 print "finished Script\n";

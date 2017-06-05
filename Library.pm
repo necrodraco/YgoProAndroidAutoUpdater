@@ -52,9 +52,10 @@ package Library{
 	}
 	sub doUpload(){	
 		my $self = shift(); 
-		$self->placeFiles($self->resources()->{pathToDrive}, 0, "");
+		#print "Go in Drive Upload\n";
+		#$self->placeFiles($self->resources()->{pathToDrive}, 0, "");
 		$self->placeFiles($self->resources()->{nameOfOutput}, 1, ".*");
-		
+		print "Drive Upload finished\n";
 		print "Upload finished\n";
 	}
 	sub placeFiles(){
