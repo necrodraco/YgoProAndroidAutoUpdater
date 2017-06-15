@@ -62,7 +62,7 @@ package Library{
 		my ($self, $pathToPlace, $git, $part) = @_; 
 
 		$self->doCommand("cp -t ".$pathToPlace." pics_normal.zip".$part." ygopro".$self->resources()->{nameOfExperiencedApk}.".apk");
-		$self->doCommand("cp ygopro".$self->resources()->{nameOfSimpleApk}.".apk ".$pathToPlace."/".$self->resources()->{nameOfApk});
+		copy "ygopro".$self->resources()->{nameOfSimpleApk}.".apk", $pathToPlace."/".$self->resources()->{nameOfApk};
 		if($git){
 			$self->doCommand("cd ".$pathToPlace." && git add * ");
 			$self->doCommand("cd ".$pathToPlace." && git status");
@@ -108,7 +108,7 @@ package Library{
 		my %ai = %{$ref};
 		foreach my $key(keys %ai){
 			
-			$self->doCommand("rm ".$self->resources()->{pathToApkFolder}."/assets/ai/full.lua");
+			unlink $self->resources()->{pathToApkFolder}."/assets/ai/full.lua";
 			
 			$self->doCommand("ln -s ".$self->resources()->{pathOfAIs}."/".$ai{$key}." ".
 				$self->resources()->{pathToApkFolder}."/assets/ai/full.lua");
@@ -121,10 +121,12 @@ package Library{
 			$self->doCommand("apksign ".$self->resources()->{pathToApkFolder}.$key.".apk"); 
 
 			##rename
-			$self->doCommand("rm ".$self->resources()->{pathToApkFolder}.$key.".apk && mv ".
-				$self->resources()->{pathToApkFolder}.$key.".s.apk ".
-				$self->resources()->{pathToApkFolder}.$key.".apk"
-				); 
+			unlink $self->resources()->{pathToApkFolder}.$key.".apk"; 
+			rename $self->resources()->{pathToApkFolder}.$key.".s.apk", $self->resources()->{pathToApkFolder}.$key.".apk"; 
+			#$self->doCommand("rm ".$self->resources()->{pathToApkFolder}.$key.".apk && mv ".
+			#	$self->resources()->{pathToApkFolder}.$key.".s.apk ".
+			#	$self->resources()->{pathToApkFolder}.$key.".apk"
+			#	); 
 		}
 	}
 	sub returnAllDatabases(){
