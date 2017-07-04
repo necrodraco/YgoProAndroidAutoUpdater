@@ -45,7 +45,7 @@ package Library{
 		foreach my $argument(@arg){
 			my $repo = Git::Repository->new(git_dir => $self->resources()->{pathToYgopro}.$argument."/.git");
 			my $status = $repo->run('pull');
-			if($status ne 'Bereits aktuell.'){
+			if($status ne 'Bereits aktuell.' && $status ne 'Already up-to-date'){
 				$self->changes(1); 
 			}
 		}
