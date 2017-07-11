@@ -8,7 +8,8 @@ package Library{
 	use File::Copy;
 	use DBI; 
 	use Git::Repository; 
-	
+	use Data::Dumper; 
+
 	no warnings 'experimental::smartmatch';
 
 	has filename => (is => 'rw', required => 1);
@@ -34,6 +35,9 @@ package Library{
 	sub doCommand($){
 		my ($self, $command) = @_;
 		if(defined($command) && $command ne ""){
+			if($self->resources()->{testing} eq "1"){
+				print "command: ".(Dumper $command)."\n"; 
+			}
 			system "$command"; 
 		}else{
 			print "One Command was not set. \n";
@@ -54,15 +58,20 @@ package Library{
 		my $self = shift(); 
 		#print "Go in Drive Upload\n";
 		#$self->placeFiles($self->resources()->{pathToDrive}, 0, "");
-		$self->placeFiles($self->resources()->{nameOfOutput}, 1, ".*");
+		$self->placeFiles($self->resources()->{nameOfOutput}, 0, ".*");
 		print "Drive Upload finished\n";
 		print "Upload finished\n";
 	}
 	sub placeFiles(){
 		my ($self, $pathToPlace, $git, $part) = @_; 
-
-		$self->doCommand("cp -t ".$pathToPlace." pics_normal.zip".$part." ygopro".$self->resources()->{nameOfExperiencedApk}.".apk");
+		print "Placing: \n";
+		$self->doCommand("cp -t ".$pathToPlace." pics_normal.zip".$part);
+		
+		#unlink $pathToPlace."/ygopro".$self->resources()->{nameOfExperiencedApk}.".apk"; 
+		#unlink $pathToPlace."/".$self->resources()->{nameOfApk}; 
+		copy "ygopro".$self->resources()->{nameOfExperiencedApk}.".apk", $pathToPlace."/ygopro".$self->resources()->{nameOfExperiencedApk}.".apk";
 		copy "ygopro".$self->resources()->{nameOfSimpleApk}.".apk", $pathToPlace."/".$self->resources()->{nameOfApk};
+		
 		if($git){
 			$self->doCommand("cd ".$pathToPlace." && git add * ");
 			$self->doCommand("cd ".$pathToPlace." && git status");

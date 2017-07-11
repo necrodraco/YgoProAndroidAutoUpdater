@@ -60,9 +60,12 @@ if($library->changes() == 1){
 			$library->resources()->{'nameOfSimpleApk'} => "full".$library->resources()->{'nameOfSimpleApk'}.".lua",
 			$library->resources()->{'nameOfExperiencedApk'} => "full".$library->resources()->{'nameOfExperiencedApk'}.".lua"
 	);
+	if($library->resources()->{testing} eq "1"){
+		print "ais: ".(Dumper \%ais)."\n"; 
+	}
 	$library->doApk(\%ais);
 
-	##upload of the files to Github
+	##upload of the files to Github and Google Drive
 	if($library->resources()->{'DoUpload'} == 1){
 		$library->doUpload();
 	}
