@@ -122,12 +122,7 @@ package Library{
 			$self->doCommand("ln -s ".$self->resources()->{pathOfAIs}."/".$ai{$key}." ".
 				$self->resources()->{pathToApkFolder}."/assets/ai/full.lua");
 
-			##create the new APK
-			$self->doCommand("apktool b -o ".$self->resources()->{pathToApkFolder}.$key.".apk ".
-				$self->resources()->{pathToApkFolder});
-
-			##sign it
-			$self->doCommand("apksign ".$self->resources()->{pathToApkFolder}.$key.".apk"); 
+			$self->createAndSignAPK($self->resources()->{pathToApkFolder}, $key);
 
 			##rename
 			unlink $self->resources()->{pathToApkFolder}.$key.".apk"; 
@@ -136,6 +131,39 @@ package Library{
 			#	$self->resources()->{pathToApkFolder}.$key.".s.apk ".
 			#	$self->resources()->{pathToApkFolder}.$key.".apk"
 			#	); 
+		}
+	}
+	sub createAndSignAPK($){
+		my $self = shift; 
+		my $filename = shift; 
+		my $key = shift; 
+		##create the new APK
+		$self->doCommand("apktool b -o ".$filename.".apk ".$filename);
+		#$self->updateAPK($filename,".apk");
+		##sign it
+		$self->doCommand("apksign ".$filename.".apk"); 
+	}
+	sub updateAPK($){
+		my $self = shift; 
+		my $filename = shift; 
+		my $format = shift; 
+		#aapt remove ygopro_custom.s.apk assets/cards.cdb && aapt add ygopro_custom.s.apk assets/cards.cdb
+		
+		find({ wanted => \&returnAllFilesInAssets, no_chdir=>1}, $filename);
+		rename $filename.$format, $filename."/".$filename.$format; 
+		foreach my $file(@pathsWithAssets){
+			$file =~ s/$filename\///g;
+			$self->doCommand("cd ".$filename." && aapt remove ".$filename.$format." ".$file); 
+			$self->doCommand("cd ".$filename." && aapt add ".$filename.$format." ".$file);	
+		}
+		rename $filename."/".$filename.$format, $filename.$format; 
+		
+	}
+	sub returnAllFilesInAssets(){
+		my $F = $File::Find::name; 
+
+		if($F =~ /\.lua$/ || $F =~ /\.cdb$/){
+			push(@pathsWithAssets, "$F");
 		}
 	}
 	sub returnAllDatabases(){
@@ -158,24 +186,41 @@ package Library{
 		my $dbh = DBI->connect("dbi:SQLite:dbname=$dest", "", "", $dbargs);
 
 		foreach my $cdbFile(@list){
-			doSqlQuery($dbh, "attach '".$cdbFile."' as toMerge");
-			doSqlQuery($dbh, "insert or ignore into datas select * from toMerge.datas");
-			doSqlQuery($dbh, "insert or ignore into texts select * from toMerge.texts");
-			doSqlQuery($dbh, "detach toMerge");
+			$self->doSqlQuery($dbh, "attach '".$cdbFile."' as toMerge");
+			$self->doSqlQuery($dbh, "insert or ignore into datas select * from toMerge.datas");
+			$self->doSqlQuery($dbh, "insert or ignore into texts select * from toMerge.texts");
+			$self->doSqlQuery($dbh, "detach toMerge");
 		}	
 
 		#Change all Anime Cards to Non-Anime
-		doSqlQuery(
+		$self->doSqlQuery(
 				$dbh, 
-				"update texts set name = name || '(Anime)' where id IN(select d.id FROM datas d JOIN texts t WHERE t.name NOT LIKE '%(%)' AND d.ot = 4)"
+				"
+				update texts 
+				set name = name || '(Anime)' 
+				where id IN(
+					select d.id 
+					FROM datas d 
+					JOIN texts t 
+					ON (
+						d.id = t.id 
+						AND t.name NOT LIKE '%(%)'
+					) 
+					WHERE d.ot NOT IN(1,2,3)
+				)
+				"
 			);
-		doSqlQuery($dbh, "update datas set ot = 3 where ot = 4");
+		$self->doSqlQuery($dbh, "update datas set ot = 3 where ot = 4");
 
 		$dbh->disconnect();
 	}
 	sub doSqlQuery($){
+		my $self = shift; 
 		my $dbh = shift; 
 		my $statement = shift; 
+		if($self->resources()->{testing} eq "1"){
+				print "Sql query: ".(Dumper $statement)."\n"; 
+			}
 		$dbh->do($statement)or die "$DBI::errstr\n"; 
 	}
 	sub prepareParams($){

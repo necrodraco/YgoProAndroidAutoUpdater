@@ -11,7 +11,8 @@ package ImageWorker{
 	use Archive::Zip qw(:ERROR_CODES); 
 	no warnings 'experimental::smartmatch';
 	use File::Find; 
-	
+	use Data::Dumper; 
+
 	has library => (is => 'rw', required => 1);
 	
 	my @imageList = (); 
@@ -20,11 +21,12 @@ package ImageWorker{
 
 	sub doPic($){
 		my ($self, $ref) = @_; 
+		my $imageS = @imageList; 
+		print "Menge Imagelist".(Dumper $imageS)."\n";
 		foreach my $file (@imageList){
 			my @items = split(/pics/, $file);
 			my $src = $items[0]."pics".$items[1]; 
 			my $dest = $self->library->resources()->{imageFolder};
-
 			$image = new Image::Magick; 
 			$image->Read($src);
 			$image->Set(quality=>'90');
@@ -98,9 +100,9 @@ package ImageWorker{
 
 	sub returnAllJumpedImages(){
 	my $F = $File::Find::name; 
-	if(/\.jpg$/){
-		my $filename = (split(/\//, $F))[-1];
-		push(@mainImageList, "$filename");
+		if(/\.jpg$/){
+			my $filename = (split(/\//, $F))[-1];
+			push(@mainImageList, "$filename");
 		}
 	}
 
@@ -108,7 +110,6 @@ package ImageWorker{
 		my $F = $File::Find::name; 
 		if($F =~ /\.jpg$/){
 			my $filename = (split(/\//, $F))[-1];
-
 			if(!($filename ~~ @mainImageList)){
 				push(@imageList, "$F");
 			}

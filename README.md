@@ -13,6 +13,7 @@ perl Moo Module - cpanm Moo
 perl Git::Repository Module - cpanm git::Repository
 ImageMagic - install on Ubuntu by sudo apt-get install imagemagick imagemagick-doc
 Apktool - Can be found here: https://ibotpeaches.github.io/Apktool/ 
+-->apktool could be substituted by sudo apt install aapt
 Apksign - Can be found here: https://github.com/appium/sign
 YGOPRO Liveimages - Can be found here:  run "git clone https://github.com/Ygoproco/Live-images.git" in /ygopro of your desktopClient
 
