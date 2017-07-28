@@ -15,7 +15,7 @@ use Library;
 use ImageWorker; 
 
 #Actions
-print "started Script\n";
+print "started Script ".(localtime(time))."\n";
 
 $library = Library->new(filename => $filename);
 
@@ -73,4 +73,4 @@ if($library->changes() == 1 || 1){
 	#$library->doUpload();
 	print "No changes, no Update\n";
 }
-print "finished Script\n";
+print "finished Script ".(localtime(time))."\n";

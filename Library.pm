@@ -17,6 +17,7 @@ package Library{
 	has changes => (is => 'rw', default => 0); 
 
 	my @pathsWithCDB = (); 
+	my @pathsWithAssets = (); 
 
 	sub readElementsResources($){
 		my $self = shift();
